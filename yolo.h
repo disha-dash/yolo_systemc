@@ -3,7 +3,7 @@
 
 #include <systemc.h>
 
-#define IMG_SIZE 8
+#define IMG_SIZE 4
 #define KERNEL_SIZE 3
 
 //----------------------------------
