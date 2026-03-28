@@ -1,18 +1,15 @@
+// ================= yolo.cpp (IMPROVED) =================
 #include "yolo.h"
 #include <cstdlib>
 #include <iostream>
+#include <cmath>
 using namespace std;
 
-// Performance tracking
-static int current_cycle = 0;
-static int first_output_cycle = -1;
-static int total_error = 0;
-
-// Kernel
+// Kernel (sharper)
 int kernel[KERNEL_SIZE][KERNEL_SIZE] = {
-    {1,1,1},
-    {1,1,1},
-    {1,1,1}
+    {0,1,0},
+    {1,4,1},
+    {0,1,0}
 };
 
 //----------------------------------
@@ -28,7 +25,6 @@ void InputGen::generate()
     cout << "\n[Input Frame " << frame << "]\n";
     cout << "Actual Object: (" << obj_x << "," << obj_y << ")\n";
 
-    // WRITE ONCE PER FRAME
     obj_x_out.write(obj_x);
     obj_y_out.write(obj_y);
 
@@ -37,7 +33,6 @@ void InputGen::generate()
         for(int j=0;j<IMG_SIZE;j++)
         {
             int val = (i==obj_x && j==obj_y) ? 20 : rand()%5;
-
             image[i][j].write(val);
             cout << val << " ";
         }
@@ -74,6 +69,7 @@ void Conv::process()
                 }
             }
 
+            sum /= 8; // normalize
             conv_out[i][j].write(sum);
         }
     }
@@ -92,25 +88,21 @@ void ReLU::process()
         return;
     }
 
-    for(int i=0;i<IMG_SIZE;i++)
-    {
+    for(int i=0;i<IMG_SIZE;i++)\    {
         for(int j=0;j<IMG_SIZE;j++)
         {
             int val = conv_in[i][j].read();
             if(val < 0) val = 0;
-
             relu_out[i][j].write(val);
         }
     }
 }
 
 //----------------------------------
-// DETECTION + METRICS
+// DETECTION (REGRESSION BASED)
 //----------------------------------
 void Detect::process()
 {
-    current_cycle++;
-
     if (rst.read())
     {
         bbox_x.write(0);
@@ -121,46 +113,57 @@ void Detect::process()
         return;
     }
 
-    int max_val = 0;
-    int cx = 0, cy = 0;
+    float sum_val = 0;
+    float weighted_x = 0;
+    float weighted_y = 0;
 
     for(int i=0;i<IMG_SIZE;i++)
     {
         for(int j=0;j<IMG_SIZE;j++)
         {
-            int val = relu_in[i][j].read();
-
-            if(val > max_val)
-            {
-                max_val = val;
-                cx = i;
-                cy = j;
-            }
+            float v = relu_in[i][j].read();
+            sum_val += v;
+            weighted_x += i * v;
+            weighted_y += j * v;
         }
     }
 
-    if(first_output_cycle == -1 && max_val > 0)
+    float cx = (sum_val > 0) ? (weighted_x / sum_val) : 0;
+    float cy = (sum_val > 0) ? (weighted_y / sum_val) : 0;
+
+    // Variance for width & height
+    float var_x = 0, var_y = 0;
+
+    for(int i=0;i<IMG_SIZE;i++)
     {
-        first_output_cycle = current_cycle;
+        for(int j=0;j<IMG_SIZE;j++)
+        {
+            float v = relu_in[i][j].read();
+            var_x += (i - cx)*(i - cx) * v;
+            var_y += (j - cy)*(j - cy) * v;
+        }
     }
 
-    int w = 1 + (max_val % IMG_SIZE);
-    int h = 1 + ((max_val / IMG_SIZE) % IMG_SIZE);
+    float w = (sum_val > 0) ? sqrt(var_x / sum_val) : 1;
+    float h = (sum_val > 0) ? sqrt(var_y / sum_val) : 1;
+
+    // Confidence normalized to 0-100
+    float max_possible = IMG_SIZE * IMG_SIZE * 20.0;
+    float conf = (sum_val / max_possible) * 100.0;
 
     int actual_x = obj_x_in.read();
     int actual_y = obj_y_in.read();
 
-    int error = abs(cx - actual_x) + abs(cy - actual_y);
-    total_error += error;
+    int error = abs((int)cx - actual_x) + abs((int)cy - actual_y);
 
-    cout << "Detected BBox: (" << cx << "," << cy 
+    cout << "Detected BBox: (" << cx << "," << cy
          << "," << w << "," << h << ")\n";
-    cout << "Confidence: " << max_val << "\n";
+    cout << "Confidence: " << conf << "\n";
     cout << "Tracking Error: " << error << "\n";
 
-    bbox_x.write(cx);
-    bbox_y.write(cy);
-    bbox_w.write(w);
-    bbox_h.write(h);
-    confidence.write(max_val);
+    bbox_x.write((int)cx);
+    bbox_y.write((int)cy);
+    bbox_w.write((int)w);
+    bbox_h.write((int)h);
+    confidence.write((int)conf);
 }
