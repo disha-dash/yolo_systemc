@@ -62,6 +62,15 @@ Tracking Error: N
 
 ---
 
+## Confidence Score
+ 
+Computed using integer fixed-point arithmetic — no floats, fully synthesisable:
+```
+conf_fp = (max_val - second_max) * 10000 / max_val
+```
+ 
+---
+
 ## Performance Metrics
 
 | Metric | Value |
