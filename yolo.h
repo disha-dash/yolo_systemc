@@ -3,8 +3,13 @@
 
 #include <systemc.h>
 
-#define IMG_SIZE 4
-#define KERNEL_SIZE 3
+#define IMG_SIZE     6   // 6x6 pixel image — more realistic
+#define KERNEL_SIZE  3   // 3x3 convolution kernel
+#define GRID_SIZE    2   // 2x2 grid of detection cells 
+#define CELL_SIZE    (IMG_SIZE / GRID_SIZE)  // pixels per cell = 3
+
+// YOLO concept: the image is divided into a GRID_SIZE x GRID_SIZE grid.
+// Each cell is responsible for detecting an object whose centre falls in it.
 
 //----------------------------------
 // Input Generator
@@ -12,7 +17,7 @@
 SC_MODULE(InputGen)
 {
     sc_in<bool> clk;
-    sc_in<bool> rst;                          // FIX #5: added rst port
+    sc_in<bool> rst;
 
     sc_out<int> image[IMG_SIZE][IMG_SIZE];
     sc_out<int> obj_x_out, obj_y_out;
@@ -77,11 +82,18 @@ SC_MODULE(Detect)
     sc_in<int>  relu_in[IMG_SIZE][IMG_SIZE];
     sc_in<int>  obj_x_in, obj_y_in;
 
-    sc_out<int> bbox_x, bbox_y;
-    sc_out<int> bbox_w, bbox_h;
-    sc_out<int> confidence;
+    // Bounding box: top-left corner of the detected grid cell (in pixels)
+    // Width and height equal CELL_SIZE — each prediction covers one grid cell
+    sc_out<int>  bbox_x, bbox_y;
+    sc_out<int>  bbox_w, bbox_h;
 
-    // FIX #2: pipeline registers as member variables (not static locals)
+    // YOLO dual output:
+    // objectness  — binary flag: is any object detected this frame?
+    // confidence  — how strongly does the best cell respond? (fixed-point x10000)
+    sc_out<bool> objectness;
+    sc_out<int>  confidence;
+
+    // 3-stage pipeline alignment registers (member variables, not static locals)
     int x_pipe[3];
     int y_pipe[3];
 
@@ -89,7 +101,6 @@ SC_MODULE(Detect)
 
     SC_CTOR(Detect)
     {
-        // Initialise pipeline registers
         for (int i = 0; i < 3; i++) { x_pipe[i] = 0; y_pipe[i] = 0; }
 
         SC_METHOD(process);
