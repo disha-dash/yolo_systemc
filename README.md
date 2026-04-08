@@ -90,9 +90,8 @@ Tracking Error          : N px
  
 Computed using integer fixed-point arithmetic — no floats, fully synthesisable:
 ```
-conf_fp = (max_val - second_max) * 10000 / max_val
+conf_fp = (best_cell_val - second_cell_val) * 10000 / best_cell_val
 ```
- 
 ---
 
 ## Performance Metrics
