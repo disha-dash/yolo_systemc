@@ -5,8 +5,8 @@
 
 #define IMG_SIZE     6   // 6x6 pixel image — more realistic
 #define KERNEL_SIZE  3   // 3x3 convolution kernel
-#define GRID_SIZE    2   // 2x2 grid of detection cells 
-#define CELL_SIZE    (IMG_SIZE / GRID_SIZE)  // pixels per cell = 3
+#define GRID_SIZE    3   // 3x3 grid of detection cells
+#define CELL_SIZE    (IMG_SIZE / GRID_SIZE)  // pixels per cell = 2
 
 // YOLO concept: the image is divided into a GRID_SIZE x GRID_SIZE grid.
 // Each cell is responsible for detecting an object whose centre falls in it.
