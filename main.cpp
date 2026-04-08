@@ -7,16 +7,18 @@ int sc_main(int argc, char* argv[])
 {
     srand((unsigned int)time(NULL));   // different random background noise each run
 
-    sc_clock     clk("clk", 10, SC_NS);
+    sc_clock        clk("clk", 10, SC_NS);
     sc_signal<bool> rst;
 
-    sc_signal<int> image[IMG_SIZE][IMG_SIZE];
-    sc_signal<int> conv_sig[IMG_SIZE][IMG_SIZE];
-    sc_signal<int> relu_sig[IMG_SIZE][IMG_SIZE];
+    sc_signal<int>  image[IMG_SIZE][IMG_SIZE];
+    sc_signal<int>  conv_sig[IMG_SIZE][IMG_SIZE];
+    sc_signal<int>  relu_sig[IMG_SIZE][IMG_SIZE];
 
-    sc_signal<int> obj_x_sig, obj_y_sig;
+    sc_signal<int>  obj_x_sig, obj_y_sig;
 
-    sc_signal<int> bbox_x, bbox_y, bbox_w, bbox_h, confidence;
+    sc_signal<int>  bbox_x, bbox_y, bbox_w, bbox_h;
+    sc_signal<int>  confidence;
+    sc_signal<bool> objectness;   // YOLO objectness output signal
 
     InputGen inputGen("InputGen");
     Conv     conv("Conv");
@@ -56,6 +58,7 @@ int sc_main(int argc, char* argv[])
     detect.bbox_w(bbox_w);
     detect.bbox_h(bbox_h);
     detect.confidence(confidence);
+    detect.objectness(objectness);   // connect objectness signal
 
     // Apply reset for one clock cycle
     rst.write(true);
@@ -64,22 +67,25 @@ int sc_main(int argc, char* argv[])
     rst.write(false);
     sc_start(200, SC_NS);
 
-    // -------- PERFORMANCE METRICS (FIX #4) --------
+    // -------- PERFORMANCE METRICS --------
     cout << "\n===== PERFORMANCE METRICS =====\n";
 
-    const int   clk_period_ns  = 10;
-    const int   latency_cycles = 3;          // InputGen -> Conv -> ReLU -> Detect
-    const int   latency_ns     = latency_cycles * clk_period_ns;
+    const int clk_period_ns  = 10;
+    const int latency_cycles = 3;
+    const int latency_ns     = latency_cycles * clk_period_ns;
 
-    // Throughput: after pipeline fills, 1 frame per clock cycle
-    double throughput_mhz = 1000.0 / clk_period_ns;   // MHz  (= 100 MHz for 10 ns clk)
+    double throughput_mhz = 1000.0 / clk_period_ns;
 
-    cout << "Clock period  : " << clk_period_ns  << " ns\n";
-    cout << "Pipeline depth: " << latency_cycles << " stages\n";
+    cout << "Clock period  : " << clk_period_ns << " ns\n";
+    cout << "Pipeline depth: " << latency_cycles << " stages"
+         << " (InputGen -> Conv -> ReLU -> Detect)\n";
     cout << "Latency       : " << latency_cycles
          << " cycles (" << latency_ns << " ns)\n";
     cout << "Throughput    : " << throughput_mhz
          << " MHz  (1 frame/cycle after pipeline fills)\n";
+    cout << "Image size    : " << IMG_SIZE << "x" << IMG_SIZE << " pixels\n";
+    cout << "Grid size     : " << GRID_SIZE << "x" << GRID_SIZE
+         << " cells (" << CELL_SIZE << "x" << CELL_SIZE << " px each)\n";
 
     return 0;
 }
