@@ -7,13 +7,16 @@ The design models a processing pipeline with real-time streaming input, 2D convo
 ---
 
 ## Features
-- Pipelined architecture (Convolution → ReLU → Detection)
-- Real 2D convolution using a sharpening kernel with zero-padding
-- Hardware-friendly fixed-point confidence score (no floating point)
-- Randomised object position and background noise — different every run
-- Bounding box output: (x, y, width, height, confidence)
-- Reset-aware pipeline — all modules hold outputs at 0 during reset
-- Performance metrics: latency, throughput, tracking error
+ - Pipelined architecture (Convolution → ReLU → Detection)
+ - Real 2D convolution using a sharpening kernel with zero-padding
+ - YOLO grid-based detection — image divided into 3×3 grid of cells
+ - Cell-relative bounding box — bbox covers the detected grid cell in pixel coordinates
+ - YOLO dual output — objectness flag (object present?) + confidence score (how sure?)
+ - Hardware-friendly fixed-point confidence score (no floating point)
+ - Gaussian-like object blob — more realistic than a single bright pixel
+ - Randomised object position and background noise — different every run
+ - Reset-aware pipeline — all modules hold outputs at 0 during reset
+ - Performance metrics: latency, throughput, tracking error
 
 ---
 
@@ -31,22 +34,27 @@ InputGen → Conv (2D) → ReLU → Detect
 ## Modules
 
 ### InputGen
-- Generates a 4×4 image frame every clock cycle
-- Object pixel = `20`; background = random noise `0–4`, re-seeded each run
-- Object position randomised each frame via `rand() % IMG_SIZE`
+- Generates a 6×6 image frame every clock cycle
+- Object is a Gaussian-like blob: peak = `20`, inner ring = `14`, outer ring = `8`, background = `0–4`
+- Object centre randomised each frame via `rand() % IMG_SIZE`
 - Holds all outputs at zero during reset
 
 ### Conv
 - Applies a real 2D convolution using a 3×3 sharpening kernel with zero-padding at borders
-
+- Amplifies the high-value object blob relative to background noise
+  
 ### ReLU
 - Element-wise activation: clamps all negative convolution outputs to zero
 
 ### Detect
-- Argmax search across ReLU output to find the brightest pixel (detected object)
-- 3-stage pipeline shift register aligns ground-truth position with detection output, compensating for the 3-cycle delay
-- Pipeline registers are module member variables — reset cleanly on `rst`
-- Computes fixed-point confidence score and Manhattan distance tracking error
+
+- Divides the 6×6 ReLU output into a **2×2 grid of cells** (3px each)
+- Computes the **maximum activation per cell** — the cell with the highest max is the detection
+- This is the core YOLO detection mechanism: each grid cell predicts whether an object is present
+- **Objectness output:** binary flag — is the best cell activation above `OBJECTNESS_THRESHOLD = 10`?
+- **Confidence output:** how dominant is the best cell vs the runner-up?
+- **Bounding box:** pixel coordinates of the detected grid cell — `(cell_x × CELL_SIZE, cell_y × CELL_SIZE, CELL_SIZE, CELL_SIZE)`
+- 3-stage pipeline shift register aligns ground-truth position with detection output
 
 ---
 
@@ -54,12 +62,28 @@ InputGen → Conv (2D) → ReLU → Detect
 
 For each frame (after 3-cycle pipeline warm-up):
 ```
-Actual Object (aligned): (x, y)
-Detected BBox: (x, y, 1, 1)
-Confidence: XX.YY%
-Tracking Error: N
+Actual Object (aligned) : (x, y)
+Detected Grid Cell      : (gi, gj)  [cell size = 4px]
+Bounding Box (pixels)   : (x, y, 4, 4)
+Objectness              : YES — object detected
+Confidence              : XX.YY%
+Tracking Error          : N px
 ```
 
+---
+
+## YOLO Concepts Demonstrated
+ 
+| YOLO Concept | Implementation |
+|---|---|
+| Grid-based detection | 2×2 grid over 6×6 image; each cell predicts independently |
+| Cell responsibility | Object assigned to the cell containing its centre pixel |
+| Bounding box prediction | bbox = cell origin + cell size in pixel coordinates |
+| Objectness score | Binary threshold on best cell activation |
+| Confidence score | Fixed-point ratio of best cell to runner-up cell |
+| Feature extraction | Conv (sharpening kernel) + ReLU activation |
+| Pipelined inference | 3-stage hardware pipeline with alignment registers |
+ 
 ---
 
 ## Confidence Score
@@ -90,20 +114,21 @@ conf_fp = (max_val - second_max) * 10000 / max_val
 ---
 
 ## Key Concepts Demonstrated
+- YOLO grid-based object detection
 - Hardware pipelining and pipeline alignment
 - Real 2D convolution in hardware
-- Fixed-point arithmetic for synthesisable confidence scoring
+- Fixed-point arithmetic for synthesisable scoring
+- Objectness and confidence as separate outputs
 - Reset-aware module design
-- Parallel processing across a pixel grid
-- Real-time data streaming simulation
 - CNN-style feature extraction (convolution + ReLU + detection)
 - Performance evaluation in hardware systems
-
+ 
 ---
 
 ## Notes
-- **Warm-up:** The first 3 frames show `Confidence: 0.00%` — expected while the pipeline fills from reset.
-- **Tracking error:** Is `0` in steady state — argmax reliably finds the object and the pipeline alignment register compensates for the 3-cycle delay.
-- **Noise robustness:** The sharpening kernel amplifies the high-value object pixel relative to low-value noise, keeping detection accurate across different random backgrounds.
+- **Warm-up:** The first 3 frames show `Confidence: 0.00%` and `Objectness: NO` — expected while the pipeline fills from reset.
+- **Tracking error:** Is bounded by `CELL_SIZE` (4px) in steady state — the object is always within the detected cell's pixel range.
+- **Gaussian blob:** The object is modelled as a blob with decreasing intensity (20 → 14 → 8) so the convolution produces a strong localised response, making grid-cell detection robust against noise.
+- **Objectness threshold:** Set to `10`. Cells with max activation ≤ 10 are treated as background — directly analogous to the confidence threshold used during real YOLO inference.
 
 ---
