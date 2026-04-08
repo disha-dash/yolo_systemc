@@ -9,7 +9,7 @@ The design models a processing pipeline with real-time streaming input, 2D convo
 ## Features
  - Pipelined architecture (Convolution → ReLU → Detection)
  - Real 2D convolution using a sharpening kernel with zero-padding
- - YOLO grid-based detection — image divided into 2×2 grid of cells
+ - YOLO grid-based detection — image divided into 3×3 grid of cells
  - Cell-relative bounding box — each detection corresponds to an entire grid cell, not an exact pixel location 
  - YOLO dual output — objectness flag (object present?) + confidence score (how sure?)
  - Hardware-friendly fixed-point confidence score (no floating point)
@@ -48,7 +48,7 @@ InputGen → Conv (2D) → ReLU → Detect
 
 ### Detect
 
-- Divides the 6×6 ReLU output into a **2×2 grid of cells** (3px each)
+- Divides the 6×6 ReLU output into a **3×3 grid of cells** (2px each)
 - Computes the **maximum activation per cell** — the cell with the highest max is the detection
 - This is the core YOLO detection mechanism: each grid cell predicts whether an object is present
 - **Objectness output:** binary flag — is the best cell activation above `OBJECTNESS_THRESHOLD = 10`?
@@ -63,8 +63,8 @@ InputGen → Conv (2D) → ReLU → Detect
 For each frame (after 3-cycle pipeline warm-up):
 ```
 Actual Object (aligned) : (x, y)
-Detected Grid Cell      : (gi, gj)  [cell size = 3px]
-Bounding Box (pixels)   : (x, y, 3, 3)
+Detected Grid Cell      : (gi, gj)  [cell size = 2px]
+Bounding Box (pixels)   : (x, y, 2, 2)
 Objectness              : YES — object detected
 Confidence              : XX.YY%
 Tracking Error          : N px
@@ -76,7 +76,7 @@ Tracking Error          : N px
  
 | YOLO Concept | Implementation |
 |---|---|
-| Grid-based detection | 2×2 grid over 6×6 image; each cell predicts independently |
+| Grid-based detection | 3×3 grid over 6×6 image; each cell predicts independently |
 | Cell responsibility | Object assigned to the cell containing its centre pixel |
 | Bounding box prediction | bbox = cell origin + cell size in pixel coordinates |
 | Objectness score | Binary threshold on best cell activation |
@@ -126,7 +126,7 @@ conf_fp = (best_cell_val - second_cell_val) * 10000 / best_cell_val
 
 ## Notes
 - **Warm-up:** The first 3 frames show `Confidence: 0.00%` and `Objectness: NO` — expected while the pipeline fills from reset.
-- **Tracking error:** It is bounded by the grid cell size (3px), since detection is cell-level rather than pixel-level.
+- **Tracking error:** It is bounded by the grid cell size (2px), since detection is cell-level rather than pixel-level.
 - **Gaussian blob:** The object is modelled as a blob with decreasing intensity (20 → 14 → 8) so the convolution produces a strong localised response, making grid-cell detection robust against noise.
 - **Objectness threshold:** Set to `10`. Cells with max activation ≤ 10 are treated as background — directly analogous to the confidence threshold used during real YOLO inference.
 
