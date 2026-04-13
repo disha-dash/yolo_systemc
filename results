@@ -1,0 +1,297 @@
+> make
+g++ main.cpp yolo.cpp -o yolo -I/usr/local/systemc/include -L/usr/local/systemc/lib-linux64 -lsystemc -lm
+
+> ./yolo
+
+        SystemC 2.3.3-Accellera --- Mar 28 2026 01:39:40
+        Copyright (c) 1996-2018 by all Contributors,
+        ALL RIGHTS RESERVED
+
+[Input Frame 0]  Object centre: (2,5)
+3       2       1       1       3       3
+1       3       3       2       2       10
+2       3       3       2       10      30
+1       0       1       1       0       10
+3       1       2       0       2       2
+1       0       3       3       0       2
+Actual Object (aligned) : (0,0)
+Detected Grid Cell      : (0,0)  [cell size = 2px]
+Bounding Box (pixels)   : (0,0,2,2)
+Objectness              : NO  — below threshold
+Confidence              : 0.00%
+Tracking Error          : 0 px
+
+[Input Frame 1]  Object centre: (3,1)
+0       1       0       1       0       3
+3       2       2       2       1       0
+0       10      2       1       1       2
+10      30      10      1       2       0
+1       10      0       2       2       1
+1       2       1       0       3       2
+Actual Object (aligned) : (0,0)
+Detected Grid Cell      : (0,0)  [cell size = 2px]
+Bounding Box (pixels)   : (0,0,2,2)
+Objectness              : NO  — below threshold
+Confidence              : 0.00%
+Tracking Error          : 0 px
+
+[Input Frame 2]  Object centre: (2,0)
+3       1       0       2       0       3
+10      0       3       0       1       3
+30      10      2       2       0       0
+10      3       2       1       0       2
+3       3       3       1       1       0
+1       0       3       1       1       2
+Actual Object (aligned) : (0,0)
+Detected Grid Cell      : (0,0)  [cell size = 2px]
+Bounding Box (pixels)   : (0,0,2,2)
+Objectness              : NO  — below threshold
+Confidence              : 0.00%
+Tracking Error          : 0 px
+
+[Input Frame 3]  Object centre: (4,1)
+0       2       0       1       1       1
+2       0       3       0       0       0
+0       2       1       0       1       0
+3       10      0       1       0       1
+10      30      10      2       1       0
+3       10      2       2       1       3
+Actual Object (aligned) : (2,5)
+Detected Grid Cell      : (1,2)  [cell size = 2px]
+Bounding Box (pixels)   : (2,4,2,2)
+Objectness              : YES — object detected
+Confidence              : 81.66%
+Tracking Error          : 1 px
+
+[Input Frame 4]  Object centre: (2,0)
+0       3       1       1       1       2
+10      0       2       2       0       2
+30      10      1       1       2       2
+10      2       2       2       3       2
+3       2       3       3       1       1
+1       3       1       0       3       1
+Actual Object (aligned) : (3,1)
+Detected Grid Cell      : (1,0)  [cell size = 2px]
+Bounding Box (pixels)   : (2,0,2,2)
+Objectness              : YES — object detected
+Confidence              : 80.00%
+Tracking Error          : 2 px
+
+[Input Frame 5]  Object centre: (3,0)
+2       1       2       2       3       1
+3       1       2       0       3       0
+10      2       1       2       2       0
+30      10      2       0       3       1
+10      1       1       3       0       2
+3       3       3       2       0       1
+Actual Object (aligned) : (2,0)
+Detected Grid Cell      : (1,0)  [cell size = 2px]
+Bounding Box (pixels)   : (2,0,2,2)
+Objectness              : YES — object detected
+Confidence              : 81.66%
+Tracking Error          : 0 px
+
+[Input Frame 6]  Object centre: (1,2)
+3       2       10      3       2       3
+1       10      30      10      3       3
+1       1       10      0       0       3
+0       2       3       0       3       1
+1       2       1       3       1       1
+2       0       1       3       3       3
+Actual Object (aligned) : (4,1)
+Detected Grid Cell      : (2,0)  [cell size = 2px]
+Bounding Box (pixels)   : (4,0,2,2)
+Objectness              : YES — object detected
+Confidence              : 80.90%
+Tracking Error          : 1 px
+
+[Input Frame 7]  Object centre: (0,0)
+30      10      3       1       1       0
+10      0       0       2       1       1
+2       1       1       0       0       1
+3       1       2       2       3       1
+3       0       3       3       1       2
+3       0       1       1       3       2
+Actual Object (aligned) : (2,0)
+Detected Grid Cell      : (1,0)  [cell size = 2px]
+Bounding Box (pixels)   : (2,0,2,2)
+Objectness              : YES — object detected
+Confidence              : 82.50%
+Tracking Error          : 0 px
+
+[Input Frame 8]  Object centre: (0,4)
+2       3       2       10      30      10
+3       0       0       0       10      1
+0       1       3       3       2       1
+1       1       3       1       1       2
+0       2       1       3       3       2
+0       2       0       3       2       2
+Actual Object (aligned) : (3,0)
+Detected Grid Cell      : (1,0)  [cell size = 2px]
+Bounding Box (pixels)   : (2,0,2,2)
+Objectness              : YES — object detected
+Confidence              : 82.50%
+Tracking Error          : 1 px
+
+[Input Frame 9]  Object centre: (4,4)
+1       2       0       2       3       0
+3       2       0       1       0       1
+3       3       2       0       1       3
+3       2       2       2       10      0
+3       0       0       10      30      10
+2       3       2       0       10      3
+Actual Object (aligned) : (1,2)
+Detected Grid Cell      : (0,1)  [cell size = 2px]
+Bounding Box (pixels)   : (0,2,2,2)
+Objectness              : YES — object detected
+Confidence              : 80.00%
+Tracking Error          : 1 px
+
+[Input Frame 10]  Object centre: (0,0)
+30      10      0       2       1       0
+10      1       0       0       2       0
+2       1       3       0       2       0
+3       1       3       2       3       3
+1       3       0       3       2       2
+3       2       2       1       2       0
+Actual Object (aligned) : (0,0)
+Detected Grid Cell      : (0,0)  [cell size = 2px]
+Bounding Box (pixels)   : (0,0,2,2)
+Objectness              : YES — object detected
+Confidence              : 83.84%
+Tracking Error          : 0 px
+
+[Input Frame 11]  Object centre: (4,0)
+1       2       3       0       2       1
+1       1       1       3       2       1
+0       1       3       3       0       0
+10      3       0       3       1       3
+30      10      2       3       1       3
+10      1       2       1       0       3
+Actual Object (aligned) : (0,4)
+Detected Grid Cell      : (0,2)  [cell size = 2px]
+Bounding Box (pixels)   : (0,4,2,2)
+Objectness              : YES — object detected
+Confidence              : 82.50%
+Tracking Error          : 0 px
+
+[Input Frame 12]  Object centre: (4,3)
+3       2       0       1       0       1
+0       2       2       1       3       1
+0       3       1       3       0       0
+1       3       2       10      0       0
+1       2       10      30      10      2
+3       2       2       10      3       1
+Actual Object (aligned) : (4,4)
+Detected Grid Cell      : (2,2)  [cell size = 2px]
+Bounding Box (pixels)   : (4,4,2,2)
+Objectness              : YES — object detected
+Confidence              : 80.90%
+Tracking Error          : 0 px
+
+[Input Frame 13]  Object centre: (1,5)
+1       2       1       2       3       10
+3       1       0       2       10      30
+2       0       2       0       0       10
+2       0       1       1       3       1
+1       0       3       0       3       1
+2       2       2       3       0       3
+Actual Object (aligned) : (0,0)
+Detected Grid Cell      : (0,0)  [cell size = 2px]
+Bounding Box (pixels)   : (0,0,2,2)
+Objectness              : YES — object detected
+Confidence              : 82.30%
+Tracking Error          : 0 px
+
+[Input Frame 14]  Object centre: (4,5)
+2       1       1       3       1       3
+1       1       1       1       1       3
+2       2       0       1       0       2
+1       3       2       1       1       10
+0       3       3       3       10      30
+3       3       1       1       1       10
+Actual Object (aligned) : (4,0)
+Detected Grid Cell      : (2,0)  [cell size = 2px]
+Bounding Box (pixels)   : (4,0,2,2)
+Objectness              : YES — object detected
+Confidence              : 81.66%
+Tracking Error          : 0 px
+
+[Input Frame 15]  Object centre: (2,2)
+0       3       1       1       1       3
+3       2       10      2       1       1
+3       10      30      10      2       1
+1       3       10      0       3       0
+1       3       0       1       2       3
+0       0       0       1       2       2
+Actual Object (aligned) : (4,3)
+Detected Grid Cell      : (2,1)  [cell size = 2px]
+Bounding Box (pixels)   : (4,2,2,2)
+Objectness              : YES — object detected
+Confidence              : 80.90%
+Tracking Error          : 1 px
+
+[Input Frame 16]  Object centre: (3,0)
+0       2       3       3       1       1
+1       2       2       0       0       3
+10      1       0       0       0       0
+30      10      1       3       0       2
+10      2       0       2       2       0
+3       0       3       0       2       3
+Actual Object (aligned) : (1,5)
+Detected Grid Cell      : (0,2)  [cell size = 2px]
+Bounding Box (pixels)   : (0,4,2,2)
+Objectness              : YES — object detected
+Confidence              : 81.66%
+Tracking Error          : 2 px
+
+[Input Frame 17]  Object centre: (5,1)
+2       0       3       3       3       1
+0       3       1       1       3       1
+2       0       2       1       0       1
+3       0       3       1       1       3
+2       10      0       3       0       3
+10      30      10      2       2       1
+Actual Object (aligned) : (4,5)
+Detected Grid Cell      : (2,2)  [cell size = 2px]
+Bounding Box (pixels)   : (4,4,2,2)
+Objectness              : YES — object detected
+Confidence              : 82.50%
+Tracking Error          : 1 px
+
+[Input Frame 18]  Object centre: (3,1)
+0       2       2       0       1       3
+2       1       0       0       1       3
+1       10      1       0       1       2
+10      30      10      3       2       3
+2       10      0       3       2       1
+2       0       3       3       3       0
+Actual Object (aligned) : (2,2)
+Detected Grid Cell      : (1,1)  [cell size = 2px]
+Bounding Box (pixels)   : (2,2,2,2)
+Objectness              : YES — object detected
+Confidence              : 80.90%
+Tracking Error          : 0 px
+
+[Input Frame 19]  Object centre: (3,5)
+2       0       3       2       2       0
+2       2       1       1       3       2
+1       0       0       1       3       10
+3       3       3       2       10      30
+1       0       0       2       3       10
+3       1       3       3       3       2
+Actual Object (aligned) : (3,0)
+Detected Grid Cell      : (1,0)  [cell size = 2px]
+Bounding Box (pixels)   : (2,0,2,2)
+Objectness              : YES — object detected
+Confidence              : 80.83%
+Tracking Error          : 1 px
+
+===== PERFORMANCE METRICS =====
+Clock period  : 10 ns
+Pipeline depth: 3 stages (InputGen -> Conv -> ReLU -> Detect)
+Latency       : 3 cycles (30 ns)
+Throughput    : 100 MHz  (1 frame/cycle after pipeline fills)
+Image size    : 6x6 pixels
+Grid size     : 3x3 cells (2x2 px each)
+=================================
